@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import java.awt.Font;
@@ -12,16 +14,23 @@ import javax.swing.JPanel;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
+
+import controller.CtrUser;
+import model.User;
+
 import com.jgoodies.forms.layout.FormSpecs;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ViewLogin {
 
 	private JFrame frame;
-	private JTextField textField;
-	private JPasswordField passwordField;
+	private JTextField textFieldUsername;
+	private JPasswordField passwordFieldLogin;
+	private CtrUser controller;
 
 	/**
 	 * Launch the application.
@@ -43,6 +52,7 @@ public class ViewLogin {
 	 * Create the application.
 	 */
 	public ViewLogin() {
+		controller = new CtrUser(this);
 		initialize();
 	}
 
@@ -86,19 +96,36 @@ public class ViewLogin {
 		JLabel lblNewLabel = new JLabel("Username");
 		panel.add(lblNewLabel, "4, 4, right, default");
 		
-		textField = new JTextField();
-		panel.add(textField, "6, 4, left, default");
-		textField.setColumns(10);
+		textFieldUsername = new JTextField();
+		panel.add(textFieldUsername, "6, 4, left, default");
+		textFieldUsername.setColumns(10);
 		
 		JLabel lblNewLabel_1 = new JLabel("Password");
 		panel.add(lblNewLabel_1, "4, 8, right, default");
 		
-		passwordField = new JPasswordField();
-		passwordField.setColumns(10);
-		panel.add(passwordField, "6, 8, left, default");
+		passwordFieldLogin = new JPasswordField();
+		passwordFieldLogin.setColumns(10);
+		panel.add(passwordFieldLogin, "6, 8, left, default");
 		
 		JButton btnNewButton = new JButton("LOGIN");
+		btnNewButton.addActionListener(new ActionListener() {
+			@SuppressWarnings("deprecation")
+			public void actionPerformed(ActionEvent arg0) {
+				controller.controlUserInfos(new User(0, textFieldUsername.getText(),
+						passwordFieldLogin.getText()));
+			}
+		});
 		panel.add(btnNewButton, "1, 12, 6, 1, center, default");
+	}
+
+	public void openHomeJFrame() {
+		ViewHome home = new ViewHome();
+		home.show();
+		this.frame.dispose();
+	}
+
+	public void showErrorMessage() {
+		JOptionPane.showMessageDialog(frame, "Username or password is invalid");
 	}
 
 }
