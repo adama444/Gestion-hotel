@@ -112,7 +112,7 @@ public class ViewLogin {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
 				controller.controlUserInfos(new User(0, textFieldUsername.getText(),
-						passwordFieldLogin.getText()));
+						String.valueOf(passwordFieldLogin.getPassword())));
 			}
 		});
 		panel.add(btnNewButton, "1, 12, 6, 1, center, default");

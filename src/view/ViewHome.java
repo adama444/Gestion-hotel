@@ -5,45 +5,58 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.JButton;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
+
+import controller.CtrUser;
+import model.User;
+
 import com.jgoodies.forms.layout.FormSpecs;
 import java.awt.CardLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ViewHome {
 
 	private JFrame frame;
+	private CtrUser controller;
 	private JPanel mainPanel = new JPanel();
 	private JPanel dashboardPanel = new JPanel();
 	private JPanel userPanel = new JPanel();
 	private JPanel clientPanel = new JPanel();
-	private JTable table;
-	private JTextField textField;
-	private JPasswordField passwordField;
-	private JPasswordField passwordField_1;
-	private JTextField textField_1;
-	private JPasswordField passwordField_2;
+	private JTable userTable;
+	private JTextField textFieldUpdateUsername;
+	private JPasswordField passwordFieldUpdatePasswd;
+	private JPasswordField passwordFieldUpdateNewPasswd;
+	private JTextField textFieldAddUsername;
+	private JPasswordField passwordFieldAddUser;
+	public JLabel jlabelUserBoxValue;
 
 	/**
 	 * Create the application.
 	 */
 	public ViewHome() {
+		controller = new CtrUser(this);
 		initialize();
+		controller.updateDashboard();
 	}
 
 	/**
@@ -53,10 +66,10 @@ public class ViewHome {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setMinimumSize(new Dimension(800, 600));
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(211, 211, 211));
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		frame.getContentPane().add(panel, BorderLayout.NORTH);
 		
 		JLabel jlabelHomeAppTitle = new JLabel("Gestion Hotel v1.0");
@@ -82,6 +95,7 @@ public class ViewHome {
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				((CardLayout)(mainPanel.getLayout())).show(mainPanel, "name_72052188820362");
+				controller.updateDashboard();
 			}
 		});
 		sidePanel.add(btnNewButton_1, "2, 2, left, top");
@@ -90,6 +104,7 @@ public class ViewHome {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				((CardLayout)(mainPanel.getLayout())).show(mainPanel, "name_72074691210271");
+				controller.printAllUser(userTable);
 			}
 		});
 		sidePanel.add(btnNewButton, "2, 4, fill, top");
@@ -129,7 +144,7 @@ public class ViewHome {
 		jlabelUserBoxTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		userBox.add(jlabelUserBoxTitle);
 		
-		JLabel jlabelUserBoxValue = new JLabel("1");
+		jlabelUserBoxValue = new JLabel("0");
 		jlabelUserBoxValue.setFont(new Font("Dialog", Font.BOLD, 16));
 		jlabelUserBoxValue.setHorizontalAlignment(SwingConstants.CENTER);
 		jlabelUserBoxValue.setBounds(0, 31, 94, 50);
@@ -147,7 +162,7 @@ public class ViewHome {
 		jlabelClientBoxTitle.setBounds(0, 0, 94, 32);
 		clientBox.add(jlabelClientBoxTitle);
 		
-		JLabel jlabelClientBoxValue = new JLabel("5");
+		JLabel jlabelClientBoxValue = new JLabel("0");
 		jlabelClientBoxValue.setHorizontalAlignment(SwingConstants.CENTER);
 		jlabelClientBoxValue.setFont(new Font("Dialog", Font.BOLD, 16));
 		jlabelClientBoxValue.setBounds(0, 31, 94, 50);
@@ -156,35 +171,42 @@ public class ViewHome {
 		userPanel.setBackground(new Color(255, 255, 255));
 		mainPanel.add(userPanel, "name_72074691210271");
 		userPanel.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("16dlu:grow"),
-				ColumnSpec.decode("200dlu"),
-				ColumnSpec.decode("16dlu"),
-				ColumnSpec.decode("max(43dlu;default):grow"),},
+				ColumnSpec.decode("default:grow"),
+				ColumnSpec.decode("250dlu"),
+				ColumnSpec.decode("default:grow"),},
 			new RowSpec[] {
 				RowSpec.decode("16dlu"),
 				FormSpecs.DEFAULT_ROWSPEC,
-				RowSpec.decode("8dlu"),
-				RowSpec.decode("70dlu"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("8dlu"),
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("150dlu:grow"),}));
+				RowSpec.decode("16dlu"),
+				FormSpecs.DEFAULT_ROWSPEC,
+				RowSpec.decode("16dlu"),}));
 		
-		JLabel lblListOfUsers = new JLabel("List of users");
-		lblListOfUsers.setFont(new Font("Dialog", Font.BOLD, 18));
-		userPanel.add(lblListOfUsers, "2, 2");
+		JLabel jlabelUserPanelTitle = new JLabel("List of users");
+		jlabelUserPanelTitle.setFont(new Font("Dialog", Font.BOLD, 18));
+		userPanel.add(jlabelUserPanelTitle, "2, 2, fill, center");
 		
-		table = new JTable();
-		table.setBackground(new Color(248, 248, 255));
-		userPanel.add(table, "2, 4, 2, 1, fill, fill");
+		JScrollPane scrollPane = new JScrollPane();
+		userPanel.add(scrollPane, "2, 4, fill, fill");
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		userPanel.add(tabbedPane, "2, 8, 2, 1, fill, fill");
+		userTable = new JTable();
+		userTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int index = userTable.getSelectedRow();
+				textFieldUpdateUsername.setText(userTable.getValueAt(index, 1).toString());
+				passwordFieldUpdatePasswd.setText(userTable.getValueAt(index, 2).toString());
+			}
+		});
+		scrollPane.setViewportView(userTable);
+		userTable.setBackground(new Color(248, 248, 255));
+		
+		JTabbedPane tabbedPaneUserPanel = new JTabbedPane(JTabbedPane.TOP);
+		userPanel.add(tabbedPaneUserPanel, "2, 6, fill, fill");
 		
 		JLayeredPane layeredPane = new JLayeredPane();
-		tabbedPane.addTab("Update user", null, layeredPane, null);
+		tabbedPaneUserPanel.addTab("Update user", null, layeredPane, null);
 		layeredPane.setLayout(new FormLayout(new ColumnSpec[] {
 				ColumnSpec.decode("8dlu"),
 				FormSpecs.DEFAULT_COLSPEC,
@@ -207,29 +229,39 @@ public class ViewHome {
 		JLabel lblUsername = new JLabel("Username");
 		layeredPane.add(lblUsername, "2, 2, center, default");
 		
-		textField = new JTextField();
-		layeredPane.add(textField, "4, 2, center, default");
-		textField.setColumns(10);
+		textFieldUpdateUsername = new JTextField();
+		textFieldUpdateUsername.setEditable(false);
+		layeredPane.add(textFieldUpdateUsername, "4, 2, center, default");
+		textFieldUpdateUsername.setColumns(10);
 		
 		JLabel lblPassword = new JLabel("Password");
 		layeredPane.add(lblPassword, "2, 4, center, default");
 		
-		passwordField = new JPasswordField();
-		passwordField.setColumns(10);
-		layeredPane.add(passwordField, "4, 4, center, default");
+		passwordFieldUpdatePasswd = new JPasswordField();
+		passwordFieldUpdatePasswd.setEditable(false);
+		passwordFieldUpdatePasswd.setColumns(10);
+		layeredPane.add(passwordFieldUpdatePasswd, "4, 4, center, default");
 		
 		JLabel lblNewPassword = new JLabel("New Password");
 		layeredPane.add(lblNewPassword, "2, 6, center, default");
 		
-		passwordField_1 = new JPasswordField();
-		passwordField_1.setColumns(10);
-		layeredPane.add(passwordField_1, "4, 6, center, default");
+		passwordFieldUpdateNewPasswd = new JPasswordField();
+		passwordFieldUpdateNewPasswd.setColumns(10);
+		layeredPane.add(passwordFieldUpdateNewPasswd, "4, 6, center, default");
 		
-		JButton btnNewButton_3 = new JButton("Update");
-		layeredPane.add(btnNewButton_3, "1, 10, 4, 1, center, default");
+		JButton btnUpdate = new JButton("Update");
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int choice = JOptionPane.showConfirmDialog(frame, "Do you want to update this user ?");
+				if (choice == 0)
+					controller.updateUser(new User(textFieldUpdateUsername.getText(), String.valueOf(passwordFieldUpdateNewPasswd.getPassword())));
+				controller.printAllUser(userTable);
+			}
+		});
+		layeredPane.add(btnUpdate, "1, 10, 4, 1, center, default");
 		
 		JLayeredPane layeredPane_1 = new JLayeredPane();
-		tabbedPane.addTab("Add user", null, layeredPane_1, null);
+		tabbedPaneUserPanel.addTab("Add user", null, layeredPane_1, null);
 		layeredPane_1.setLayout(new FormLayout(new ColumnSpec[] {
 				ColumnSpec.decode("16dlu"),
 				FormSpecs.DEFAULT_COLSPEC,
@@ -248,19 +280,27 @@ public class ViewHome {
 		JLabel lblUsername_1 = new JLabel("Username");
 		layeredPane_1.add(lblUsername_1, "2, 2, right, default");
 		
-		textField_1 = new JTextField();
-		layeredPane_1.add(textField_1, "4, 2, center, default");
-		textField_1.setColumns(10);
+		textFieldAddUsername = new JTextField();
+		layeredPane_1.add(textFieldAddUsername, "4, 2, center, default");
+		textFieldAddUsername.setColumns(10);
 		
 		JLabel lblPassword_1 = new JLabel("Password");
 		layeredPane_1.add(lblPassword_1, "2, 4, right, default");
 		
-		passwordField_2 = new JPasswordField();
-		passwordField_2.setColumns(10);
-		layeredPane_1.add(passwordField_2, "4, 4, center, default");
+		passwordFieldAddUser = new JPasswordField();
+		passwordFieldAddUser.setColumns(10);
+		layeredPane_1.add(passwordFieldAddUser, "4, 4, center, default");
 		
-		JButton btnNewButton_4 = new JButton("Add");
-		layeredPane_1.add(btnNewButton_4, "1, 8, 4, 1, center, default");
+		JButton btnAdd = new JButton("Add");
+		btnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int choice = JOptionPane.showConfirmDialog(frame, "Do you want to add a new user ?");
+				if (choice == 0)
+					controller.addUser(new User(textFieldAddUsername.getText(), String.valueOf(passwordFieldAddUser.getPassword())));
+				controller.printAllUser(userTable);
+			}
+		});
+		layeredPane_1.add(btnAdd, "1, 8, 4, 1, center, default");
 		
 		clientPanel.setBackground(new Color(34, 139, 34));
 		mainPanel.add(clientPanel, "name_72083669374496");
@@ -268,5 +308,17 @@ public class ViewHome {
 	
 	public void show() {
 		frame.setVisible(true);
+	}
+	
+	public void showErrorMessage(String message) {
+		JOptionPane.showMessageDialog(frame, message, "Gestion Hotel", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	public void showSuccessMessage(String message) {
+		JOptionPane.showMessageDialog(frame, message, "Gestion Hotel", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public JFrame getFrame() {
+		return frame;
 	}
 }
